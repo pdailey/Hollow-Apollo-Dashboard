@@ -10,7 +10,7 @@ $RECYCLE.BIN/
 
 # Vim crap
 *.swp
-*.un~
+*~
 
 # Windows Installer files
 *.cab
