@@ -21,6 +21,8 @@ from bokeh.models.widgets import Slider, Select, TextInput, Button, MultiSelect,
 from bokeh.io import curdoc
 import bokeh.palettes as bp
 
+width_text = 400
+width_plots = 800 
 
 # TODO: if exists, else create new
 table = join(dirname(__file__), "sql_table.db")
@@ -220,7 +222,7 @@ def update_env_plot(new):
 # Plot
 
 plot_config = dict(tools="pan, xwheel_zoom, box_select, save",
-                   x_axis_type ="datetime", plot_width=800)
+                   x_axis_type ="datetime", plot_width=width_plots)
 
 plt_tc = figure(
         plot_height=400,
@@ -254,6 +256,7 @@ plt_fan = figure(
 colors = bp.brewer['RdBu'][4]
 l_fl= plt_fan.line("x", "Fan_L", source=source, legend = " Left Fan", color=colors[0])
 l_fr= plt_fan.line("x", "Fan_R", source=source, legend = " Right Fan", color=colors[3])
+fan_lines = [l_fl, l_fr]
 
 #
 plt_env = figure(
@@ -300,22 +303,22 @@ fans= CheckboxButtonGroup(
 fans.on_click(update_fan_plot)
 
 env = CheckboxButtonGroup(
-		labels=['T_L', 'RH_L', 'T_R', 'RH_R', 'T_Out', 'RH_Out'],
+		labels=['T_L', 'T_R', 'T_Out', 'RH_L', 'RH_R', 'RH_Out'],
 		active=[0, 1, 2, 3, 4, 5])
 env.on_click(update_env_plot)
 
 controls = [btn_browse, radio_location, radio_chamber, tcs, fans, env]
 sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
-inputs = widgetbox(*controls, width=400, sizing_mode=sizing_mode)
+inputs = widgetbox(*controls, width=width_text, sizing_mode=sizing_mode)
 
-desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=800)
+desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=width_text)
 
 # arrange the graphs to stack on top of each other
-sub = column( plt_tc, plt_fan, plt_env )
+plots = column( plt_tc, plt_fan, plt_env )
+text = column( desc, inputs )
 
 ll = layout([
-    [desc],
-    [inputs, sub],
+    [text, plots],
 ], sizing_mode=sizing_mode)
 
 #update_data()  # initial load of the data
@@ -323,39 +326,3 @@ ll = layout([
 
 curdoc().add_root(ll)
 curdoc().title ="Hollow Apollo Dashboard"
-
-'''
-
-def plotChamber(side, x_range, y_range, w=600, h=450):
-    #Generate Chamber Condition Plots and pass back x range for all plots
-    x = df['datetime'].values
-
-    if side == "Left":
-        cols = ['T_L', 'RH_L', 'T_Out', 'RH_Out']
-    else:
-        cols = ['T_R', 'RH_R', 'T_Out', 'RH_Out']
-
-    #calculate dew points
-    dp = calculateDewPoint(df[cols[0]].values, df[cols[1]].values)
-    dp_o = calculateDewPoint(df[cols[2]].values, df[cols[3]].values)
-
-    p = figure(
-        y_axis_label='Chamber Temperature/RH, C/%',
-        x_axis_type="datetime",
-        **plot_config
-    )
-
-    p.line(x, df[cols[0]].values, legend="Inside Temperature", line_color="red")
-    p.line(x, df[cols[1]].values, legend="Inside RH", line_color="blue")
-    p.line(x, df[cols[2]].values, legend="Outside Temperature", line_dash="4 4", line_width=1, line_color="red")
-    p.line(x, df[cols[3]].values, legend="Outside RH", line_dash="4 4", line_width=1, line_color="blue")
-
-    if x_range is None:
-        x_range = p.x_range
-        y_range = p.y_range
-    else:
-        p.x_range = x_range
-        p.y_range = y_range
-
-    return p, x_range, y_range
-'''
