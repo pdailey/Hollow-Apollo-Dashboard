@@ -167,6 +167,26 @@ def select_readings():
 
     return selected
 
+def select_chamber(new):
+    chamber = radio_chamber.labels[radio_chamber.active]
+    print("CHAMBER")
+    print("chamber")
+    if chamber == "Left":
+        tcs.active = [0, 1, 2, 3]
+        fans.active = [0]
+        env.active = [0, 2, 3, 5]
+    elif chamber == "Right":
+        tcs.active = [4, 5, 6, 7]
+        fans.active = [1]
+        env.active = [1, 2, 4, 5]
+    elif chamber == "Both":
+        tcs.active = [0, 1, 2, 3, 4, 5, 6, 7]
+        fans.active = [0, 1]
+        env.active = [0, 1, 2, 3, 4, 5]
+
+    
+
+
 def datetime(x):
         return np.array(x, dtype=np.datetime64)
 
@@ -219,6 +239,7 @@ def update_env_plot(new):
             env_lines[i].visible=True
         else:
             env_lines[i].visible=False
+
 
 # Plot
 
@@ -280,12 +301,12 @@ env_lines = [ l_lt, l_rt, l_ot, l_lh, l_rh, l_oh  ]
 
 # Widgets
 # Descriptions
-pars = ["Add csv files to the database", 
-       "Select test location", 
-       "Select Chamber", 
-       "Display Readings<\ br> Thermocouples", 
-       "Fans", 
-       "Chamber Temperature and Relative Humidity"
+pars = ["Add csv files to the database:", 
+	"Select test location:", 
+	"Select Chamber:", 
+	"Thermocouples:", 
+	"Fan Currents:", 
+	"Chamber Temperature and Relative Humidity:"
        ]
 
 desc =[]
@@ -298,10 +319,11 @@ btn_browse = Button(label="Add Data", button_type="success")
 btn_browse.on_change('clicks', lambda attr, old, new: clickBrowse())
 
 # Radio Buttons
-radio_location = RadioButtonGroup(labels = ["US", "BJ", "SZ"], active=2 )
+# Active is intentionally out of range to force user to make selection
+radio_location = RadioButtonGroup(labels = ["US", "BJ", "SZ"], active=3 ) 
 radio_location.on_click(update_data)
-radio_chamber = RadioButtonGroup(labels = ["Left", "Right", "Both"], active=2)
-radio_chamber.on_click(update_data)
+radio_chamber = RadioButtonGroup(labels = ["Left", "Right", "Both"], active=3)
+radio_chamber.on_click(select_chamber)
 
 
 # Checkbox Buttons
@@ -320,6 +342,8 @@ env = CheckboxButtonGroup(
 		labels=['T_L', 'T_R', 'T_Out', 'RH_L', 'RH_R', 'RH_Out'],
 		active=[0, 1, 2, 3, 4, 5])
 env.on_click(update_env_plot)
+
+
 
 btns = [btn_browse, radio_location, radio_chamber, tcs, fans, env]
 
