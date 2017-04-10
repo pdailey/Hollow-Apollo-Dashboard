@@ -15,11 +15,12 @@ import sqlite3 as sql
 
 from bokeh.plotting import figure
 from bokeh.layouts import layout, widgetbox, column
-from bokeh.models import ColumnDataSource, HoverTool, Div, DataRange1d
+from bokeh.models import ColumnDataSource, HoverTool, Div, Paragraph, DataRange1d
 from bokeh.models.glyphs import Patch
 from bokeh.models.widgets import Slider, Select, TextInput, Button, MultiSelect, RadioButtonGroup, CheckboxButtonGroup
 from bokeh.io import curdoc
 import bokeh.palettes as bp
+
 
 width_text = 400
 width_plots = 800 
@@ -278,6 +279,19 @@ l_oh= plt_env.line("x", "RH_Out", source=source, legend="Outside RH", color=grn[
 env_lines = [ l_lt, l_rt, l_ot, l_lh, l_rh, l_oh  ]
 
 # Widgets
+# Descriptions
+pars = ["Add csv files to the database", 
+       "Select test location", 
+       "Select Chamber", 
+       "Display Readings<\ br> Thermocouples", 
+       "Fans", 
+       "Chamber Temperature and Relative Humidity"
+       ]
+
+desc =[]
+for p in pars:
+    desc.append(Paragraph(text=p))
+
 
 # Buttons
 btn_browse = Button(label="Add Data", button_type="success")
@@ -307,7 +321,11 @@ env = CheckboxButtonGroup(
 		active=[0, 1, 2, 3, 4, 5])
 env.on_click(update_env_plot)
 
-controls = [btn_browse, radio_location, radio_chamber, tcs, fans, env]
+btns = [btn_browse, radio_location, radio_chamber, tcs, fans, env]
+
+# Weave inputs and descriptions
+controls = [j for i in zip(desc, btns) for j in i]
+
 sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
 inputs = widgetbox(*controls, width=width_text, sizing_mode=sizing_mode)
 
