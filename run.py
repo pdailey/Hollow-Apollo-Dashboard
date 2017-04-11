@@ -5,8 +5,8 @@ Starts a Bokeh server at a randomly assigned port.
 from random import randint
 import subprocess
 
-port = randint(0, 8888)
-proc = 'bokeh serve --port {:04d} --show HollowApolloDashboard'.format(port)
+port = randint(1000, 8888)
+proc = 'BOKEH_PY_LOG_LEVEL=debug bokeh serve --port {:04d} --show dash'.format(port)
 
 
 if __name__ == '__main__':
