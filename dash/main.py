@@ -157,7 +157,8 @@ source = ColumnDataSource(data=dict(x=[],
 
 # Event Handling
 def select_readings():
-    list(readings)
+    #list(readings)
+
     # Select data from only one location specified by the button group
     loc = radio_location.labels[radio_location.active]
     print("LOCATION")
@@ -166,10 +167,11 @@ def select_readings():
 
     return selected
 
+
 def select_chamber(new):
     chamber = radio_chamber.labels[radio_chamber.active]
-    print("CHAMBER")
-    print("chamber")
+    print("CHAMBER:")
+    print(chamber)
     if chamber == "Left":
         tcs.active = [0, 1, 2, 3]
         fans.active = [0]
@@ -184,8 +186,6 @@ def select_chamber(new):
         env.active = [0, 1, 2, 3, 4, 5]
 
 
-
-
 def datetime(x):
         return np.array(x, dtype=np.datetime64)
 
@@ -193,10 +193,10 @@ def update_data(new=None):
     print("UPDATE DATA")
     df = select_readings()
     df =  df.sort_values( "datetime" )
-    print(df["datetime"])
 
     source.data = dict(
-        x = datetime(df["datetime"]),
+        x = pd.to_datetime(df["datetime"]),
+        # x = datetime(df["datetime"]),
         TC_1=df[" TC_1"],
         TC_2=df[" TC_2"],
         TC_3=df[" TC_3"],
