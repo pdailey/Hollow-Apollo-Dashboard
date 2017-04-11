@@ -23,7 +23,7 @@ import bokeh.palettes as bp
 
 
 width_text = 400
-width_plots = 800 
+width_plots = 800
 
 # TODO: if exists, else create new
 table = join(dirname(__file__), "sql_table.db")
@@ -47,7 +47,6 @@ def browseFiles(filetype=[("CSV", "*.csv")]):
 
     print("The following files were selected:")
     for f in files:
-        #f = Path(f)
         print(f)
 
     return files
@@ -184,7 +183,7 @@ def select_chamber(new):
         fans.active = [0, 1]
         env.active = [0, 1, 2, 3, 4, 5]
 
-    
+
 
 
 def datetime(x):
@@ -301,11 +300,11 @@ env_lines = [ l_lt, l_rt, l_ot, l_lh, l_rh, l_oh  ]
 
 # Widgets
 # Descriptions
-pars = ["Add csv files to the database:", 
-	"Select test location:", 
-	"Select Chamber:", 
-	"Thermocouples:", 
-	"Fan Currents:", 
+pars = ["Add csv files to the database:",
+	"Select test location:",
+	"Select Chamber:",
+	"Thermocouples:",
+	"Fan Currents:",
 	"Chamber Temperature and Relative Humidity:"
        ]
 
@@ -320,7 +319,7 @@ btn_browse.on_change('clicks', lambda attr, old, new: clickBrowse())
 
 # Radio Buttons
 # Active is intentionally out of range to force user to make selection
-radio_location = RadioButtonGroup(labels = ["US", "BJ", "SZ"], active=3 ) 
+radio_location = RadioButtonGroup(labels = ["US", "BJ", "SZ"], active=3 )
 radio_location.on_click(update_data)
 radio_chamber = RadioButtonGroup(labels = ["Left", "Right", "Both"], active=3)
 radio_chamber.on_click(select_chamber)
