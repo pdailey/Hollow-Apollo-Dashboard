@@ -26,9 +26,11 @@ width_text = 400
 width_plots = 800
 
 # TODO: if exists, else create new
-table = join(dirname(__file__), "sql_table.db")
-sql_conn = sql.connect(table)
-c = sql_conn.cursor()
+
+sql_db = join(dirname(__file__), "sql_table.db")
+sql_conn = sql.connect(sql_db)
+cc = sql_conn.cursor()
+sql_table = 'my_table'
 
 
 def browseFiles(filetype=[("CSV", "*.csv")]):
@@ -132,15 +134,16 @@ def clickBrowse():
             df_main.append(df)
 
     # append data to SQL DB
-    df_main.to_sql("my_table", sql_conn, if_exists='append')
+    print("Appending data to sql")
+    df_main.to_sql(sql_table, sql_conn, if_exists='append')
 
     # remove duplicates from the SQL table
     # TODO: Unexpected behavior
     #removeDuplicateRows()
 
+#TODO: make a function: def update_SQL
 query = open(join(dirname(__file__), 'query.sql')).read()
 readings = psql.read_sql(query, sql_conn)
-
 readings.fillna(0, inplace=True)  # just replace missing values with zero
 
 
@@ -277,6 +280,7 @@ plt_fan = figure(
 colors = bp.brewer['RdBu'][4]
 l_fl= plt_fan.line("x", "Fan_L", source=source, legend = " Left Fan", color=colors[0])
 l_fr= plt_fan.line("x", "Fan_R", source=source, legend = " Right Fan", color=colors[3])
+
 fan_lines = [l_fl, l_fr]
 
 #
@@ -352,7 +356,7 @@ controls = [j for i in zip(desc, btns) for j in i]
 sizing_mode = 'fixed'  # 'scale_width' also looks nice with this example
 inputs = widgetbox(*controls, width=width_text, sizing_mode=sizing_mode)
 
-desc = Div(text=open(join(dirname(__file__), "description.html")).read(), width=width_text)
+desc = Div(text=open(join(dirname(__file__), "static/description.html")).read(), width=width_text)
 
 # arrange the graphs to stack on top of each other
 plots = column( plt_tc, plt_fan, plt_env )
