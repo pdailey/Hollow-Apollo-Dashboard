@@ -54,6 +54,21 @@ def createSQLTable(db, table, struct_table, erase_existing=False):
 
 #createSQLTable(sql_db, sql_table, struct_table, erase_existing=True)
 
+def updateReadingsFromSQL():
+    # Open the connection and create a cursor
+    conn = sql.connect(sql_db)
+    cc = conn.cursor()
+
+    '''Update the pandas df used for graphing with latest data from the SQL db'''
+    query = open(join(dirname(__file__), 'query.sql')).read()
+    readings = psql.read_sql(query, conn)
+
+    # Save the changes and close the connection
+    conn.commit()
+    conn.close()
+
+    readings.fillna(0, inplace=True)  # replace missing values with zero
+    return readings
 
 
 def browseFiles(filetype=[("CSV", "*.csv")]):
@@ -223,9 +238,10 @@ def select_chamber(new):
 def datetime(x):
         return np.array(x, dtype=np.datetime64)
 
-    df = select_readings()
 def update_location(new=None):
     print("UPDATE LOCATION")
+    readings = updateReadingsFromSQL()
+    df = select_readings(readings)
     df =  df.sort_values( "datetime" )
 
     source.data = dict(
