@@ -28,6 +28,32 @@ sql_db = join(dirname(__file__), "database.db")
 sql_table = 'the_table'
 struct_table = '''( 'index' INTEGER, 'datetime' TEXT, ' TC_4' REAL, ' TC_3' REAL, ' TC_2' REAL, ' TC_1' REAL, ' TC_8' REAL, ' TC_7' REAL, ' TC_6' REAL, ' TC_5' REAL, 'Fan R' REAL, 'Fan L' REAL, 'T_R' REAL, 'RH_R' REAL, 'T_L' REAL, 'RH_L' REAL, 'T_Out' REAL, 'RH_Out' REAL, 'location' TEXT )'''
 
+def createSQLTable(db, table, struct_table, erase_existing=False):
+    '''Creates a blank SQL table with specified structure in the
+    specified SQL database. Creates and opens a cursor to access the
+    database. If the database does not exist, it will be created.
+    If erase existing is set to true, an existing table will be written'''
+    #TODO:Untested
+    conn = sql.connect(db)
+    cc = conn.cursor()
+
+    if erase_existing:
+        try:
+            cc.execute('''DROP TABLE {}'''.format(table))
+        except:
+            pass
+
+
+    # Create the table
+    # Will throw an error if the table already exists
+    cc.execute('''CREATE TABLE {} {}'''.format(table, struct_table))
+
+    # Save the changes and close the connection
+    conn.commit()
+    conn.close()
+
+#createSQLTable(sql_db, sql_table, struct_table, erase_existing=True)
+
 
 
 def browseFiles(filetype=[("CSV", "*.csv")]):
@@ -102,6 +128,10 @@ def removeDuplicateRows():
     df.to_sql("my_table", sql_conn, if_exists='replace')
     print("\nSQL table had {} rows. \n{} duplicate rows found and removed.".format(prev_len, diff))
 
+def clickDelete():
+    print("Clearing all records from DB...")
+    createSQLTable(sql_db, sql_table, struct_table, erase_existing=True)
+    print("...Done")
 
 def clickBrowse():
     # Select file(s) using a tk window
@@ -310,7 +340,8 @@ pars = ["Add csv files to the database:",
 	"Select Chamber:",
 	"Thermocouples:",
 	"Fan Currents:",
-	"Chamber Temperature and Relative Humidity:"
+	"Chamber Temperature and Relative Humidity:",
+	"Remove All Data From Database"
        ]
 
 desc =[]
@@ -321,6 +352,9 @@ for p in pars:
 # Buttons
 btn_browse = Button(label="Add Data", button_type="success")
 btn_browse.on_change('clicks', lambda attr, old, new: clickBrowse())
+
+btn_del = Button(label="Clear all records from database", button_type="success")
+btn_del.on_change('clicks', lambda attr, old, new: clickDelete())
 
 # Radio Buttons
 # Active is intentionally out of range to force user to make selection
