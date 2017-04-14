@@ -192,9 +192,9 @@ def select_chamber(new):
 def datetime(x):
         return np.array(x, dtype=np.datetime64)
 
-def update_data(new=None):
     print("UPDATE DATA")
     df = select_readings()
+def update_location(new=None):
     df =  df.sort_values( "datetime" )
 
     source.data = dict(
@@ -324,8 +324,8 @@ btn_browse.on_change('clicks', lambda attr, old, new: clickBrowse())
 # Radio Buttons
 # Active is intentionally out of range to force user to make selection
 radio_location = RadioButtonGroup(labels = ["US", "BJ", "SZ"], active=3 )
-radio_location.on_click(update_data)
 radio_chamber = RadioButtonGroup(labels = ["Left", "Right", "Both"], active=3)
+radio_location.on_click(update_location)
 radio_chamber.on_click(select_chamber)
 
 
@@ -366,7 +366,7 @@ ll = layout([
     [text, plots],
 ], sizing_mode=sizing_mode)
 
-#update_data()  # initial load of the data
+#update_location()  # initial load of the data
 #update_tc_plot()  # initial load of the plots
 
 curdoc().add_root(ll)
