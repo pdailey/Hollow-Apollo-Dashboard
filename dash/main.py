@@ -21,16 +21,13 @@ from bokeh.models.widgets import Slider, Select, TextInput, Button, MultiSelect,
 from bokeh.io import curdoc
 import bokeh.palettes as bp
 
-
 width_text = 400
 width_plots = 800
 
-# TODO: if exists, else create new
+sql_db = join(dirname(__file__), "database.db")
+sql_table = 'the_table'
+struct_table = '''( 'index' INTEGER, 'datetime' TEXT, ' TC_4' REAL, ' TC_3' REAL, ' TC_2' REAL, ' TC_1' REAL, ' TC_8' REAL, ' TC_7' REAL, ' TC_6' REAL, ' TC_5' REAL, 'Fan R' REAL, 'Fan L' REAL, 'T_R' REAL, 'RH_R' REAL, 'T_L' REAL, 'RH_L' REAL, 'T_Out' REAL, 'RH_Out' REAL, 'location' TEXT )'''
 
-sql_db = join(dirname(__file__), "sql_table.db")
-sql_conn = sql.connect(sql_db)
-cc = sql_conn.cursor()
-sql_table = 'my_table'
 
 
 def browseFiles(filetype=[("CSV", "*.csv")]):
