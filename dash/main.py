@@ -31,8 +31,8 @@ struct_table = '''( 'index' INTEGER, 'datetime' TEXT, ' TC_4' REAL, ' TC_3' REAL
 
 
 def browseFiles(filetype=[("CSV", "*.csv")]):
-    '''Opens a tk window to browse for files. Returns a
-    list of files with full path'''
+    '''Opens a tk window to browse for files of a specified filetype.
+    Returns a list of files with full path'''
 
     root = tk.Tk()
     root.withdraw()
@@ -84,6 +84,7 @@ def addLocationCol(df, _file):
     df["location"] = loc
     return df
 
+# TODO: Untested
 def removeDuplicateRows():
     '''Reads a SQL table, searches for duplicate rows and removes them'''
     # get the query and use it to open df
@@ -103,6 +104,7 @@ def removeDuplicateRows():
 
 
 def clickBrowse():
+    # Select file(s) using a tk window
     files = browseFiles()
 
     if len(files)==0:
@@ -111,17 +113,15 @@ def clickBrowse():
     else:
         print("Imported " + str(len(files)) + " data files.")
 
-    for f in files:
-        f = Path(f)
-        print("file:{}, dir:{}".format(f.name, f.parent))
-
-    # TODO: Save files in hidden dir
-
-    # convert each file to a df, append that df to the master df
+    # convert each file to a df, append that the SQL DB
     for i, f in enumerate(files):
-        #TODO: Verify incoming data
+        print("Processing {}....".format(f))
         df = pd.read_csv(f, index_col=False)
+        # convert unix time to datetime
+        df['datetime'] = pd.to_datetime(df['datetime'],unit='s')
+
         df = renameCols(df)
+        # use filename to determine test location
         df = addLocationCol(df, f)
 
         # check is we have already created the master df
@@ -130,18 +130,15 @@ def clickBrowse():
         else:
             df_main.append(df)
 
-    # append data to SQL DB
-    print("Appending data to sql")
-    df_main.to_sql(sql_table, sql_conn, if_exists='append')
+        # TODO: may be unnecessary...
+        print("\tupdatting Readings from SQL...")
+        readings = updateReadingsFromSQL()
+        print("...Done.")
 
     # remove duplicates from the SQL table
     # TODO: Unexpected behavior
     #removeDuplicateRows()
 
-#TODO: make a function: def update_SQL
-query = open(join(dirname(__file__), 'query.sql')).read()
-readings = psql.read_sql(query, sql_conn)
-readings.fillna(0, inplace=True)  # just replace missing values with zero
 
 
 # Data
@@ -156,22 +153,25 @@ source = ColumnDataSource(data=dict(x=[],
 
 
 # Event Handling
-def select_readings():
-    #list(readings)
+def select_readings(readings):
+    '''Filters data from the main pandas dataframe based upon the current widget
+       states. returns a filtered dataframe.'''
 
-    # Select data from only one location specified by the button group
+    # Get location that is currently selected
     loc = radio_location.labels[radio_location.active]
-    print("LOCATION")
-    print(loc)
-    selected = readings[readings.location.str.contains(loc) == True]
 
+    print("SELECTING FROM LOCATION: {}".format(loc))
+    # Select data from only one location specified by the button group
+    selected = readings[readings.location.str.contains(loc) == True]
     return selected
 
 
 def select_chamber(new):
+    '''On selecting a chamber, all the plots are updated to only show
+       information from sensors in selected chamber'''
     chamber = radio_chamber.labels[radio_chamber.active]
-    print("CHAMBER:")
-    print(chamber)
+    print("SELECTED CHAMBER: {}".format(chamber))
+
     if chamber == "Left":
         tcs.active = [0, 1, 2, 3]
         fans.active = [0]
@@ -189,9 +189,9 @@ def select_chamber(new):
 def datetime(x):
         return np.array(x, dtype=np.datetime64)
 
-    print("UPDATE DATA")
     df = select_readings()
 def update_location(new=None):
+    print("UPDATE LOCATION")
     df =  df.sort_values( "datetime" )
 
     source.data = dict(
@@ -331,7 +331,6 @@ tcs = CheckboxButtonGroup(
         labels=['TC_1', 'TC_2', 'TC_3', 'TC_4', 'TC_5', 'TC_6', 'TC_7', 'TC_8'],
         active=[0, 1, 2, 3, 4, 5, 6, 7])
 tcs.on_click(update_tc_plot)
-
 
 fans= CheckboxButtonGroup(
 		labels=['Fan L', 'Fan R'],
