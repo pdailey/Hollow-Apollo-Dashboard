@@ -93,9 +93,6 @@ def browseFiles(filetype=[("CSV", "*.csv")]):
 
 
 def renameCols(df):
-    # convert unix time to datetime
-    df['datetime'] = pd.to_datetime(df['datetime'],unit='s')
-
     # Rename columns.
     #Some sensors are not correctly addressed in the hardware itself.
     df.rename(columns={' Fan Current L': 'Fan R', ' Fan Currrent R': 'Fan L'}, inplace=True)
@@ -234,9 +231,6 @@ def select_chamber(new):
         fans.active = []
         env.active = []
 
-
-def datetime(x):
-        return np.array(x, dtype=np.datetime64)
 
 def update_location(new=None):
     print("UPDATE LOCATION")
