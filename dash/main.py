@@ -81,7 +81,6 @@ def writeDataframeToSQL(df, sql_db, sql_table):
     conn.commit()
     conn.close()
 
-
 def browseFiles(filetype=[("CSV", "*.csv")]):
     '''Opens a tk window to browse for files of a specified filetype.
     Returns a list of files with full path'''
@@ -89,9 +88,13 @@ def browseFiles(filetype=[("CSV", "*.csv")]):
     root = tk.Tk()
     root.withdraw()
     root.update()
+
+    # Bring window to front
+    root.lift()
+    root.focus_force()
     files = filedialog.askopenfilenames(
             parent = root,
-            title='Choose CSV files to import',
+            title='Choose files to import',
             filetypes=filetype)
     files = root.tk.splitlist(files)
     root.update()
@@ -373,7 +376,7 @@ pars = ["Add csv files to the database:",
 	"Thermocouples:",
 	"Fan Currents:",
 	"Chamber Temperature and Relative Humidity:",
-	"Remove All Data From Database"
+	"Remove ALL data From the database. Useful if Program is slowing down due to too much data. WARNING! CANNOT BE UNDONE."
        ]
 
 desc =[]
@@ -385,7 +388,7 @@ for p in pars:
 btn_browse = Button(label="Add Data", button_type="success")
 btn_browse.on_change('clicks', lambda attr, old, new: clickBrowse())
 
-btn_del = Button(label="Clear all records from database", button_type="success")
+btn_del = Button(label="Clear Database", button_type="warning")
 btn_del.on_change('clicks', lambda attr, old, new: clickDelete())
 
 # Radio Buttons
