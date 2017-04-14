@@ -71,6 +71,17 @@ def updateReadingsFromSQL():
     return readings
 
 
+def writeDataframeToSQL(df, sql_db, sql_table):
+    conn = sql.connect(sql_db)
+    cc = conn.cursor()
+
+    df.to_sql(sql_table, conn, if_exists='append', index=False)
+
+    # Save the changes and close the connection
+    conn.commit()
+    conn.close()
+
+
 def browseFiles(filetype=[("CSV", "*.csv")]):
     '''Opens a tk window to browse for files of a specified filetype.
     Returns a list of files with full path'''
@@ -125,20 +136,32 @@ def addLocationCol(df, _file):
 # TODO: Untested
 def removeDuplicateRows():
     '''Reads a SQL table, searches for duplicate rows and removes them'''
-    # get the query and use it to open df
+    conn = sql.connect(sql_db)
+    cc = conn.cursor()
+
     query = open(join(dirname(__file__), 'query.sql')).read()
-    df = psql.read_sql(query, sql_conn)
-    df.fillna(0, inplace=True)  # just replace missing values with zero
-    prev_len = len(df.index)
+    df = psql.read_sql(query, conn)
+
+    print("Before")
+    print(df.describe(percentiles=None))
+    print(df.info())
+    #prev_len = len(df.index)
 
     # remove duplace rows
-    df = df.drop_duplicates()
-    curr_len = len(df.index)
-    diff = prev_len - curr_len
+    df.drop_duplicates(subset=["datetime","location"], keep="last", inplace=True)
+    #curr_len = len(df.index)
+    #diff = prev_len - curr_len
 
+    print("After")
+    print(df.describe(percentiles=None))
+    print(df.info())
     # replace the SQL table with the new df
-    df.to_sql("my_table", sql_conn, if_exists='replace')
-    print("\nSQL table had {} rows. \n{} duplicate rows found and removed.".format(prev_len, diff))
+    df.to_sql(sql_table, conn, index=False, if_exists='replace')
+    #print("\nSQL table had {} rows. \n{} duplicate rows found and removed.".format(prev_len, diff))
+
+    # Save the changes and close the connection
+    conn.commit()
+    conn.close()
 
 def clickDelete():
     print("Clearing all records from DB...")
@@ -166,11 +189,9 @@ def clickBrowse():
         # use filename to determine test location
         df = addLocationCol(df, f)
 
-        # check is we have already created the master df
-        if(i == 0):
-            df_main = df
-        else:
-            df_main.append(df)
+        # append data to SQL DB
+        print("\tappending data to sql...")
+        writeDataframeToSQL(df, sql_db, sql_table)
 
         # TODO: may be unnecessary...
         print("\tupdatting Readings from SQL...")
@@ -178,8 +199,7 @@ def clickBrowse():
         print("...Done.")
 
     # remove duplicates from the SQL table
-    # TODO: Unexpected behavior
-    #removeDuplicateRows()
+    removeDuplicateRows()
 
 
 
@@ -284,7 +304,9 @@ def update_env_plot(new):
             env_lines[i].visible=False
 
 
+
 # Plot
+readings = updateReadingsFromSQL()
 
 plot_config = dict(tools="pan, xwheel_zoom, box_select, save",
                    x_axis_type ="datetime", plot_width=width_plots)
