@@ -184,6 +184,10 @@ def select_chamber(new):
         tcs.active = [0, 1, 2, 3, 4, 5, 6, 7]
         fans.active = [0, 1]
         env.active = [0, 1, 2, 3, 4, 5]
+    elif chamber == "None":
+        tcs.active = []
+        fans.active = []
+        env.active = []
 
 
 def datetime(x):
@@ -321,8 +325,8 @@ btn_browse.on_change('clicks', lambda attr, old, new: clickBrowse())
 # Radio Buttons
 # Active is intentionally out of range to force user to make selection
 radio_location = RadioButtonGroup(labels = ["US", "BJ", "SZ"], active=3 )
-radio_chamber = RadioButtonGroup(labels = ["Left", "Right", "Both"], active=3)
 radio_location.on_click(update_location)
+radio_chamber = RadioButtonGroup(labels = ["Left", "Right", "Both", "None"], active=3)
 radio_chamber.on_click(select_chamber)
 
 
@@ -344,7 +348,7 @@ env.on_click(update_env_plot)
 
 
 
-btns = [btn_browse, radio_location, radio_chamber, tcs, fans, env]
+btns = [btn_browse, radio_location, radio_chamber, tcs, fans, env, btn_del]
 
 # Weave inputs and descriptions
 controls = [j for i in zip(desc, btns) for j in i]
