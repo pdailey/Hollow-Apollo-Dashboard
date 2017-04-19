@@ -26,7 +26,7 @@ width_plots = 800
 
 sql_db = join(dirname(__file__), "database.db")
 sql_table = 'the_table'
-struct_table = '''( 'index' INTEGER, 'datetime' TEXT, ' TC_4' REAL, ' TC_3' REAL, ' TC_2' REAL, ' TC_1' REAL, ' TC_8' REAL, ' TC_7' REAL, ' TC_6' REAL, ' TC_5' REAL, 'Fan R' REAL, 'Fan L' REAL, 'T_R' REAL, 'RH_R' REAL, 'T_L' REAL, 'RH_L' REAL, 'T_Out' REAL, 'RH_Out' REAL, 'location' TEXT )'''
+struct_table = '''( 'index' INTEGER, 'datetime' TEXT, 'TC_4' REAL, 'TC_3' REAL, 'TC_2' REAL, 'TC_1' REAL, 'TC_8' REAL, 'TC_7' REAL, 'TC_6' REAL, 'TC_5' REAL, 'Fan R' REAL, 'Fan L' REAL, 'T_R' REAL, 'RH_R' REAL, 'T_L' REAL, 'RH_L' REAL, 'T_Out' REAL, 'RH_Out' REAL, 'location' TEXT )'''
 
 def createSQLTable(db, table, struct_table, erase_existing=False):
     '''Creates a blank SQL table with specified structure in the
@@ -109,9 +109,20 @@ def browseFiles(filetype=[("CSV", "*.csv")]):
 def renameCols(df):
     # Rename columns.
     #Some sensors are not correctly addressed in the hardware itself.
-    df.rename(columns={' Fan Current L': 'Fan R', ' Fan Currrent R': 'Fan L'}, inplace=True)
-    df.rename(columns={' T_L': 'T_R', ' T_R': 'T_L'}, inplace=True)
-    df.rename(columns={' RH_L': 'RH_R', ' RH_R': 'RH_L'}, inplace=True)
+    df.rename(columns={ ' TC_1': 'TC_5',
+                        ' TC_2': 'TC_6',
+                        ' TC_3': 'TC_7',
+                        ' TC_4': 'TC_8',
+                        ' TC_5': 'TC_1',
+                        ' TC_6': 'TC_2',
+                        ' TC_7': 'TC_3',
+                        ' TC_8': 'TC_4'},
+                        inplace=True)
+
+    # All the others have spaces
+    df.rename(columns={' Fan Current L': 'Fan L', ' Fan Currrent R': 'Fan R'}, inplace=True)
+    df.rename(columns={' T_L': 'T_L', ' T_R': 'T_R'}, inplace=True)
+    df.rename(columns={' RH_L': 'RH_L', ' RH_R': 'RH_R'}, inplace=True)
     df.rename(columns={' T_Out': 'T_Out', ' RH_Out': 'RH_Out'}, inplace=True)
 
     return df
@@ -264,14 +275,14 @@ def update_location(new=None):
     source.data = dict(
         x = pd.to_datetime(df["datetime"]),
         # x = datetime(df["datetime"]),
-        TC_1=df[" TC_1"],
-        TC_2=df[" TC_2"],
-        TC_3=df[" TC_3"],
-        TC_4=df[" TC_4"],
-        TC_5=df[" TC_5"],
-        TC_6=df[" TC_6"],
-        TC_7=df[" TC_7"],
-        TC_8=df[" TC_8"],
+        TC_1=df["TC_1"],
+        TC_2=df["TC_2"],
+        TC_3=df["TC_3"],
+        TC_4=df["TC_4"],
+        TC_5=df["TC_5"],
+        TC_6=df["TC_6"],
+        TC_7=df["TC_7"],
+        TC_8=df["TC_8"],
         Fan_L=df["Fan L"],
         Fan_R=df["Fan R"],
         T_L=df["T_L"],
@@ -344,8 +355,8 @@ plt_fan = figure(
         **plot_config)
 
 colors = bp.brewer['RdBu'][4]
-l_fl= plt_fan.line("x", "Fan_L", source=source, legend = " Left Fan", color=colors[0])
-l_fr= plt_fan.line("x", "Fan_R", source=source, legend = " Right Fan", color=colors[3])
+l_fl= plt_fan.line("x", "Fan_L", source=source, legend = "Left Fan", color=colors[0])
+l_fr= plt_fan.line("x", "Fan_R", source=source, legend = "Right Fan", color=colors[3])
 
 fan_lines = [l_fl, l_fr]
 
